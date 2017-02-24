@@ -56,7 +56,7 @@ public class Handle implements Runnable{
       }catch(NoSuchAlgorithmException e){
          e.printStackTrace();
       }
-      return -1;
+      return 1;
    }
 
    private void getFile(InputStream in, String name)throws IOException{
