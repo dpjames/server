@@ -5,8 +5,8 @@ public class Client{
    private static final int PORT = 2265;
    private static final String IP = "127.0.0.1"; // 47.32.178.27
    public static void main(String[] args)throws IOException{
-      if(args.length !=2){
-         System.out.println("Usage: stuff");
+      if(args.length !=4){
+         System.out.println("Usage: java client [action] [file] [username] [password]");
          System.exit(1);
       }
       int mode = getMode(args[0]);
@@ -14,6 +14,12 @@ public class Client{
          Socket sock = new Socket(IP,PORT);
          InputStream in = sock.getInputStream();
          OutputStream out = sock.getOutputStream();
+         out.write(args[2].length());
+         out.write(args[2].getBytes());
+         out.flush();
+         out.write(args[3].length());
+         out.write(args[3].getBytes());
+         out.flush();
          doAction(mode, args[1], in, out);
          in.close();
          out.close();
