@@ -4,6 +4,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.*;
+
+import javax.security.auth.login.LoginException;
 public class Handle implements Runnable{
 
    private Socket sock;
@@ -11,19 +13,28 @@ public class Handle implements Runnable{
       this.sock = sock;
    }
    public void run(){
+   OutputStream out = null;
+   InputStream in = null; 
    try{
-      InputStream in = sock.getInputStream();
-      OutputStream out = sock.getOutputStream();
+      in = sock.getInputStream();
+      out = sock.getOutputStream();
       authenticate(in, out);
       doAction(in, out);
-      in.close();
-      out.close();
+   }catch(LoginException e){
+      e.printStackTrace();
    }catch(Exception e){
       e.printStackTrace();
+   }finally{
+      try{
+      in.close();
+      out.close();
+      }catch(Exception e){
+         e.printStackTrace();
+      }
    }
 }
 
-   private void authenticate(InputStream in, OutputStream out)throws IOException{
+   private void authenticate(InputStream in, OutputStream out)throws IOException, LoginException{
       int length = in.read();
 
       byte[] buff = new byte[length];
@@ -38,10 +49,10 @@ public class Handle implements Runnable{
       in.read(buff);
       login(user, buff);
    }
-   private boolean checkPass(String user, byte[] pass){
+   private boolean checkPass(String user, byte[] pass) {
       return false;
    }
-   private void login(String user, byte[] pswd){
+   private void login(String user, byte[] pswd)throws LoginException{
       try{
          MessageDigest md = MessageDigest.getInstance("SHA-256");
          md.update(pswd);
@@ -49,7 +60,7 @@ public class Handle implements Runnable{
          if(checkPass(user,pswd)){
 
          }else{
-            System.exit(1);
+            throw new LoginException("invalid login");
          }
       }catch(NoSuchAlgorithmException e){
          e.printStackTrace();
