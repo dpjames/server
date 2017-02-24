@@ -38,13 +38,19 @@ public class Handle implements Runnable{
       in.read(buff);
       login(user, buff);
    }
+   private boolean checkPass(String user, byte[] pass){
+      return false;
+   }
    private void login(String user, byte[] pswd){
       try{
          MessageDigest md = MessageDigest.getInstance("SHA-256");
          md.update(pswd);
          pswd = md.digest();
-         System.out.println(pswd.length);
-         System.out.println(user);
+         if(checkPass(user,pswd)){
+
+         }else{
+            System.exit(1);
+         }
       }catch(NoSuchAlgorithmException e){
          e.printStackTrace();
       }
