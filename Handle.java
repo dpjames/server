@@ -18,23 +18,16 @@ public class Handle implements Runnable{
    try{
       in = sock.getInputStream();
       out = sock.getOutputStream();
-      authenticate(in, out);
+      out.write(authenticate(in, out));
       doAction(in, out);
-   }catch(LoginException e){
-      e.printStackTrace();
-   }catch(Exception e){
-      e.printStackTrace();
-   }finally{
-      try{
       in.close();
       out.close();
-      }catch(Exception e){
-         e.printStackTrace();
-      }
+   }catch(Exception e){
+      e.printStackTrace();
    }
 }
 
-   private void authenticate(InputStream in, OutputStream out)throws IOException, LoginException{
+   private int authenticate(InputStream in, OutputStream out)throws IOException{
       int length = in.read();
 
       byte[] buff = new byte[length];
@@ -47,24 +40,23 @@ public class Handle implements Runnable{
       System.out.println(length);
       buff = new byte[length];
       in.read(buff);
-      login(user, buff);
+      return login(user, buff);
    }
    private boolean checkPass(String user, byte[] pass) {
       return false;
    }
-   private void login(String user, byte[] pswd)throws LoginException{
+   private int login(String user, byte[] pswd){
       try{
          MessageDigest md = MessageDigest.getInstance("SHA-256");
          md.update(pswd);
          pswd = md.digest();
          if(checkPass(user,pswd)){
-
-         }else{
-            throw new LoginException("invalid login");
+            return 0;
          }
       }catch(NoSuchAlgorithmException e){
          e.printStackTrace();
       }
+      return -1;
    }
 
    private void getFile(InputStream in, String name)throws IOException{
