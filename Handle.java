@@ -43,7 +43,7 @@ public class Handle implements Runnable{
          MessageDigest md = MessageDigest.getInstance("SHA-256");
          md.update(pswd);
          pswd = md.digest();
-         System.out.println(pswd);
+         System.out.println(pswd.length);
          System.out.println(user);
       }catch(NoSuchAlgorithmException e){
          e.printStackTrace();
@@ -51,6 +51,7 @@ public class Handle implements Runnable{
    }
 
    private void getFile(InputStream in, String name)throws IOException{
+      System.out.println("getting file: " + name);
       int max = 1024;
       byte[] bytefile = new byte[max]; 
       int read = 0;
@@ -74,6 +75,7 @@ public class Handle implements Runnable{
       fos.close();
    }
    private void sendFile(OutputStream out, String name)throws IOException{
+      System.out.println("Sending file: " + name);
       byte[] file = file2byte(name);
       out.write(file);
    }
