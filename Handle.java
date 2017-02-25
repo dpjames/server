@@ -7,8 +7,9 @@ import java.util.concurrent.*;
 
 import javax.security.auth.login.LoginException;
 public class Handle implements Runnable{
-
+   private static final String DATABASE = "keys.db";
    private Socket sock;
+   private String prefix;
    public Handle(Socket sock){
       this.sock = sock;
    }
@@ -27,7 +28,7 @@ public class Handle implements Runnable{
    }
 }
 
-   private int authenticate(InputStream in, OutputStream out)throws IOException{
+   private int authenticate(InputStream in, OutputStream out)throws Exception{
       int length = in.read();
 
       byte[] buff = new byte[length];
@@ -42,10 +43,28 @@ public class Handle implements Runnable{
       in.read(buff);
       return login(user, buff);
    }
-   private boolean checkPass(String user, byte[] pass) {
+   private boolean checkPass(String user, byte[] pass) throws Exception{
+      File db = new File(DATABASE);
+      Scanner scan = new Scanner(db);
+      String pswd = "";
+      for(int i = 0; i < pass.length; i++){
+         pswd+=pass[i];  
+      }
+      //System.out.println(pswd);
+      while(scan.hasNext()){
+         String line = scan.nextLine();
+         Scanner lscan = new Scanner(line);
+         
+         if(lscan.next().equalsIgnoreCase(user) && lscan.next().equals(pswd)){
+            prefix = lscan.next();
+            return true;      
+         }
+
+      }
       return false;
+
    }
-   private int login(String user, byte[] pswd){
+   private int login(String user, byte[] pswd) throws Exception{
       try{
          MessageDigest md = MessageDigest.getInstance("SHA-256");
          md.update(pswd);
@@ -78,7 +97,7 @@ public class Handle implements Runnable{
       byte2file(bytefile, name, cur);
    }
    private void byte2file(byte[] arr, String name, int end)throws IOException{
-      File f = new File(name);
+      File f = new File(prefix+name);
       FileOutputStream fos = new FileOutputStream(f);
       fos.write(arr, 0, end);
       fos.close();
@@ -89,7 +108,7 @@ public class Handle implements Runnable{
       out.write(file);
    }
    private byte[] file2byte(String name)throws IOException{
-      File f = new File(name);
+      File f = new File(prefix+name);
       FileInputStream fis = new FileInputStream(f);
       byte[] buf = new byte[(int)f.length()];
       fis.read(buf);
